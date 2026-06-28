@@ -1,0 +1,36 @@
+# ACT policy config — wraps LeRobot's built-in ACT implementation.
+# Tune chunk_size first; everything else is a good starting point for ALOHA.
+
+_target_: lerobot.common.policies.act.configuration_act.ACTConfig
+
+# Action chunking
+chunk_size: 100          # number of future actions predicted per forward pass
+n_action_steps: 100      # how many of those to execute before re-querying
+
+# Temporal ensembling (blends overlapping chunks; 0 = disabled)
+temporal_ensemble_coeff: 0.01
+
+# Vision backbone
+vision_backbone: resnet18
+pretrained_backbone_weights: ResNet18_Weights.IMAGENET1K_V1
+replace_final_stride_with_dilation: false
+
+# Transformer
+dim_model: 512
+n_heads: 8
+dim_feedforward: 3200
+feedforward_activation: relu
+n_encoder_layers: 4
+n_decoder_layers: 7
+
+# CVAE
+latent_dim: 32
+kl_weight: 10.0          # weight on the KL term in the ELBO loss
+
+# Camera keys that the policy sees (must match dataset feature names)
+input_shapes:
+  observation.images.top: [3, 480, 640]
+  observation.state: [14]
+
+output_shapes:
+  action: [7]

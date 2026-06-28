@@ -1,0 +1,3 @@
+task: gym_aloha/AlohaInsertion-v0
+fps: 50
+episode_length: 400   # max steps per episode (~8 seconds)

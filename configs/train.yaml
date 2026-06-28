@@ -1,0 +1,32 @@
+defaults:
+  - env: aloha_insertion
+  - policy: act
+  - _self_
+
+# Dataset
+dataset_repo_id: local/handact-demos   # or your HF Hub id
+root: data/demos
+
+# Training
+seed: 42
+device: cuda                  # or "cpu" for Colab / Kaggle without GPU
+
+training:
+  num_workers: 4
+  batch_size: 8
+  num_epochs: 100
+  grad_clip_norm: 10.0
+
+  optimizer:
+    _target_: torch.optim.AdamW
+    lr: 1e-5
+    weight_decay: 1e-4
+
+  lr_scheduler:
+    _target_: torch.optim.lr_scheduler.CosineAnnealingLR
+    T_max: 100
+
+# Logging
+log_dir: outputs/train
+eval_freq: 10          # evaluate every N epochs
+save_freq: 10
