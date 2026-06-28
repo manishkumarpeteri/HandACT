@@ -16,11 +16,27 @@ from pathlib import Path
 
 import gymnasium as gym
 import numpy as np
+import yaml
 
 # LeRobot dataset API (lerobot >= 0.3)
 from lerobot.common.datasets.lerobot_dataset import LeRobotDataset
 
 from handact.teleop import HandTeleop, TeleopConfig, teleop_state_to_action
+
+
+def load_teleop_config(path: Path, camera_index: int) -> TeleopConfig:
+    """Load calibrated config from YAML if it exists, else use defaults."""
+    if path.exists():
+        with open(path) as f:
+            data = yaml.safe_load(f)
+        cfg = TeleopConfig(**data)
+        print(f"Loaded teleop config from {path}")
+    else:
+        cfg = TeleopConfig()
+        print(f"No calibration file found at {path} — using defaults. "
+              f"Run scripts/calibrate_teleop.py first for best results.")
+    cfg.camera_index = camera_index
+    return cfg
 
 
 # ---------------------------------------------------------------------------
@@ -114,6 +130,8 @@ def parse_args():
     p.add_argument("--repo-id", default=None,
                    help="HuggingFace Hub repo id to push to (optional)")
     p.add_argument("--camera-index", type=int, default=0)
+    p.add_argument("--teleop-config", type=Path, default=Path("configs/teleop.yaml"),
+                   help="Calibrated teleop config (produced by calibrate_teleop.py)")
     return p.parse_args()
 
 
@@ -157,7 +175,7 @@ def main():
     # ------------------------------------------------------------------
     # Initialise teleop + environment
     # ------------------------------------------------------------------
-    teleop_cfg = TeleopConfig(camera_index=args.camera_index)
+    teleop_cfg = load_teleop_config(args.teleop_config, args.camera_index)
     teleop = HandTeleop(config=teleop_cfg)
     teleop.start()
 
